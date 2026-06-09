@@ -62,7 +62,7 @@ export default function Home() {
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Balances</h2>
           <div className="grid grid-cols-3 gap-4">
             {ROOMMATES.map((name) => {
-              const bal = getBalance(name)
+              const bal = parseFloat(getBalance(name))
               return (
                 <div key={name} className="text-center p-4 bg-gray-50 rounded-xl">
                   <p className="text-sm text-gray-500 mb-1">{name}</p>

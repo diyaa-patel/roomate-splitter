@@ -1,8 +1,8 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { supabase } from '../lib/supabase'
 
 const CATEGORIES = ['Rent', 'Utilities', 'Groceries', 'Other']
-
 const ROOMMATES = ['Diya', 'Roommate 2', 'Roommate 3']
 
 export default function Home() {
@@ -13,18 +13,39 @@ export default function Home() {
     category: 'Rent',
     paidBy: 'Diya',
   })
+  const [loading, setLoading] = useState(false)
 
-  function addExpense() {
+  useEffect(() => {
+    fetchExpenses()
+  }, [])
+
+  async function fetchExpenses() {
+    const { data } = await supabase
+      .from('expenses')
+      .select('*')
+      .order('created_at', { ascending: false })
+    if (data) setExpenses(data)
+  }
+
+  async function addExpense() {
     if (!form.description || !form.amount) return
-    setExpenses([...expenses, { ...form, id: Date.now(), amount: parseFloat(form.amount) }])
+    setLoading(true)
+    await supabase.from('expenses').insert({
+      description: form.description,
+      amount: parseFloat(form.amount),
+      category: form.category,
+      paid_by: form.paidBy,
+    })
     setForm({ description: '', amount: '', category: 'Rent', paidBy: 'Diya' })
+    await fetchExpenses()
+    setLoading(false)
   }
 
   function getBalance(name) {
     let balance = 0
     expenses.forEach((e) => {
       const split = e.amount / ROOMMATES.length
-      if (e.paidBy === name) balance += e.amount - split
+      if (e.paid_by === name) balance += e.amount - split
       else balance -= split
     })
     return balance.toFixed(2)
@@ -88,9 +109,10 @@ export default function Home() {
           </div>
           <button
             onClick={addExpense}
-            className="w-full bg-gray-900 text-white rounded-lg p-2 text-sm font-medium hover:bg-gray-700 transition"
+            disabled={loading}
+            className="w-full bg-gray-900 text-white rounded-lg p-2 text-sm font-medium hover:bg-gray-700 transition disabled:opacity-50"
           >
-            Add Expense
+            {loading ? 'Adding...' : 'Add Expense'}
           </button>
         </div>
 
@@ -105,9 +127,9 @@ export default function Home() {
                 <div key={e.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-xl">
                   <div>
                     <p className="text-sm font-medium text-gray-800">{e.description}</p>
-                    <p className="text-xs text-gray-400">{e.category} · paid by {e.paidBy}</p>
+                    <p className="text-xs text-gray-400">{e.category} · paid by {e.paid_by}</p>
                   </div>
-                  <p className="text-sm font-bold text-gray-900">${e.amount.toFixed(2)}</p>
+                  <p className="text-sm font-bold text-gray-900">${parseFloat(e.amount).toFixed(2)}</p>
                 </div>
               ))}
             </div>

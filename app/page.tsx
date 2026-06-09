@@ -6,7 +6,7 @@ const CATEGORIES = ['Rent', 'Utilities', 'Groceries', 'Other']
 const ROOMMATES = ['Diya', 'Roommate 2', 'Roommate 3']
 
 export default function Home() {
-  const [expenses, setExpenses] = useState([])
+  const [expenses, setExpenses] = useState<any[]>([])
   const [form, setForm] = useState({
     description: '',
     amount: '',

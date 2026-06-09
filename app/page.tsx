@@ -41,7 +41,7 @@ export default function Home() {
     setLoading(false)
   }
 
-  function getBalance(name) {
+  function getBalance(name: string) {
     let balance = 0
     expenses.forEach((e) => {
       const split = e.amount / ROOMMATES.length
